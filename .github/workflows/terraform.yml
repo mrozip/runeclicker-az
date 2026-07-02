@@ -97,7 +97,6 @@ jobs:
           : "${TF_STATE_STORAGE_ACCOUNT_NAME:?Set TF_STATE_STORAGE_ACCOUNT_NAME as a GitHub variable.}"
 
       - name: Azure login
-        if: inputs.bootstrap_state == true
         uses: azure/login@v3
         with:
           client-id: ${{ env.ARM_CLIENT_ID }}
@@ -187,6 +186,25 @@ jobs:
             -backend-config="container_name=${TF_STATE_CONTAINER_NAME}" \
             -backend-config="key=${TF_STATE_KEY}" \
             -backend-config="resource_group_name=${TF_STATE_RESOURCE_GROUP_NAME}"
+
+      - name: Import existing resources into Terraform state
+        run: |
+          set -euo pipefail
+
+          resource_group_id="/subscriptions/${ARM_SUBSCRIPTION_ID}/resourceGroups/${TF_VAR_resource_group_name}"
+          static_site_id="${resource_group_id}/providers/Microsoft.Web/staticSites/${TF_VAR_static_web_app_name}"
+
+          if az group exists --name "$TF_VAR_resource_group_name" | grep -qi '^true$'; then
+            if ! terraform state show azurerm_resource_group.site >/dev/null 2>&1; then
+              terraform import azurerm_resource_group.site "$resource_group_id"
+            fi
+          fi
+
+          if az resource show --ids "$static_site_id" >/dev/null 2>&1; then
+            if ! terraform state show azurerm_static_web_app.site >/dev/null 2>&1; then
+              terraform import azurerm_static_web_app.site "$static_site_id"
+            fi
+          fi
 
       - name: Terraform validate
         run: terraform validate
