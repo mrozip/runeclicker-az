@@ -4,13 +4,13 @@
     "rewrite": "/index.html",
     "exclude": [
       "/assets/*",
-      "/assets/**",
+      "/assets/*",
       "/hacktimer/*",
-      "/hacktimer/**",
+      "/hacktimer/*",
       "/images/*",
-      "/images/**",
+      "/images/*",
       "/tables/*",
-      "/tables/**",
+      "/tables/*",
       "/*.{css,js,map,json,ico,png,jpg,jpeg,gif,webp,svg,txt,woff,woff2}"
     ]
   },
