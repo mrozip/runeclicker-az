@@ -35,7 +35,7 @@ on:
       location:
         description: Azure region for a manual run.
         required: true
-        default: eastus
+        default: eastus2
         type: string
       sku:
         description: Azure Static Web Apps SKU for a manual run.
@@ -74,7 +74,7 @@ env:
   TF_STATE_STORAGE_ACCOUNT_NAME: ${{ vars.TF_STATE_STORAGE_ACCOUNT_NAME }}
   TF_STATE_CONTAINER_NAME: ${{ vars.TF_STATE_CONTAINER_NAME || 'tfstate' }}
   TF_STATE_KEY: ${{ inputs.state_key }}
-  TF_STATE_LOCATION: ${{ vars.TF_STATE_LOCATION || 'eastus' }}
+  TF_STATE_LOCATION: ${{ vars.TF_STATE_LOCATION || 'eastus2' }}
 
 jobs:
   terraform:

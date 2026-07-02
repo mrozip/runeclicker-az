@@ -30,7 +30,7 @@ To test a new Azure resource group and Static Web App from GitHub without touchi
 | `resource_group_name` | `rg-runeclicker-app-sbx` |
 | `static_web_app_name` | `swa-runeclicker-app-sbx` |
 | `state_key` | `runeclicker/sbx/app.tfstate` |
-| `location` | `eastus` |
+| `location` | `eastus2` |
 | `sku` | `Free` |
 
 Use the same `state_key`, `resource_group_name`, and `static_web_app_name` with `operation=destroy` to remove the sandbox resources.
@@ -52,7 +52,7 @@ Optional variables:
 | --- | --- |
 | `TF_STATE_RESOURCE_GROUP_NAME` | `rg-runeclicker-state-shared` |
 | `TF_STATE_CONTAINER_NAME` | `tfstate` |
-| `TF_STATE_LOCATION` | `eastus` |
+| `TF_STATE_LOCATION` | `eastus2` |
 
 Resource names, location, SKU, and state key are provided by required workflow inputs with sandbox-safe defaults.
 
@@ -86,5 +86,5 @@ The default configuration creates:
 | --- | --- |
 | Resource group | `rg-runeclicker-app-prod` |
 | Static Web App | `swa-runeclicker-app-prod` |
-| Location | `eastus` |
+| Location | `eastus2` |
 | SKU | `Free` |

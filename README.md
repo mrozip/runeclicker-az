@@ -87,7 +87,7 @@ Optional GitHub variables:
 | --- | --- |
 | `TF_STATE_RESOURCE_GROUP_NAME` | `rg-runeclicker-state-shared` |
 | `TF_STATE_CONTAINER_NAME` | `tfstate` |
-| `TF_STATE_LOCATION` | `eastus` |
+| `TF_STATE_LOCATION` | `eastus2` |
 
 Keep `AZURE_STATIC_WEB_APPS_API_TOKEN` pointed at the existing production Static Web App. Do not replace it with a sandbox deployment token unless you intentionally want the deployment workflow to target that sandbox app.
 
