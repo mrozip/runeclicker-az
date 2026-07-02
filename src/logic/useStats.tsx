@@ -90,8 +90,8 @@ export const useStats = create<StatsStore>((set) => ({
             : useStats.getState().calculateLvl(player.xp[skill]);
 
         let stats: SkillStats;
-        let absoluteBonuses: Partial<SkillStats> = {};
-        let percentageBonuses: Partial<SkillStats> = {};
+        const absoluteBonuses: Partial<SkillStats> = {};
+        const percentageBonuses: Partial<SkillStats> = {};
 
         // Initialize base stats based on skill
         switch (skill) {

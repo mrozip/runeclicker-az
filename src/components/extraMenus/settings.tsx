@@ -38,7 +38,7 @@ const SettingsComponent: React.FC = () => {
             saveGame(parsedSave); // Save to localStorage
             setPlayer(parsedSave); // Update the player state
             addMessage("Save file loaded.");
-        } catch (error) {
+        } catch {
             addMessage("Invalid save file.");
         }
     };

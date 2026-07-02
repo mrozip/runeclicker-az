@@ -1,11 +1,7 @@
 import React from "react";
 import { Text } from "../text";
 
-interface InfoProps {
-
-}
-
-export const Info: React.FC<InfoProps> = ({ }) => {
+export const Info: React.FC = () => {
   return (
     <div style={{ maxHeight: "327px", overflowY: "scroll", padding: "8px" }}>
       <div style={{ marginBottom: "8px" }}>

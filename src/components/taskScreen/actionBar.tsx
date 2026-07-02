@@ -5,11 +5,7 @@ import { useTask } from "../../logic/useTask";
 import { usePlayer } from "../../logic/usePlayer";
 import { useFarming } from "../../logic/useFarming";
 
-interface ActionBarProps {
-
-}
-
-export const ActionBar: React.FC<ActionBarProps> = ({ }) => {
+export const ActionBar: React.FC = () => {
     const skill = usePlayer((state) => state.player.skill);
     const task = usePlayer((state) => state.player.task);
 

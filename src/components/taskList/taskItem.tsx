@@ -130,8 +130,11 @@ export const TaskItem: React.FC<{
             break;
 
         case "Processing":
+            if (!taskData.output?.[0]) {
+                return null;
+            }
             mainIcon = <TaskIcon unlockedTask={unlockedTask} icon={
-                <Item index={taskData.output?.[0].id!} quantity={calculateMaxTasks("Processing", task)} overrideShowTooltip={true} />
+                <Item index={taskData.output[0].id} quantity={calculateMaxTasks("Processing", task)} overrideShowTooltip={true} />
             } chance={taskData.output?.[0].probability} />
             rightIcons = (
                 <div style={{ display: "flex", gap: "8px" }}>

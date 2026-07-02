@@ -4,11 +4,11 @@ import { Window } from "./window";
 import { SAVE_KEY } from "../config";
 
 interface ErrorScreenProps {
-    error: any;
+    error: unknown;
 }
 
 export const ErrorScreen: React.FC<ErrorScreenProps> = ({ error }) => {
-    const message = error?.message || String(error);
+    const message = error instanceof Error ? error.message : String(error);
     const saveData = localStorage.getItem(SAVE_KEY);
 
     const handleNewGame = () => {
@@ -49,6 +49,6 @@ export const ErrorScreen: React.FC<ErrorScreenProps> = ({ error }) => {
 };
 
 // export JSX (not render)
-export function renderError(error: any): JSX.Element {
+export function renderError(error: unknown): JSX.Element {
     return <ErrorScreen error={error} />;
 }

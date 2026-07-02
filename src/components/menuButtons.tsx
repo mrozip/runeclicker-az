@@ -9,11 +9,55 @@ interface MenuButtonsProps {
 }
 
 interface ButtonConfig {
-    key: "stats" | "info" | "settings";
+    id: "stats" | "info" | "settings";
     icon: string;
     marginLeft?: number;
     marginRight?: number;
 }
+
+interface MenuButtonProps extends ButtonConfig {
+    selected: boolean;
+    handleViewSelect: (selection: "skill" | "stats" | "info" | "settings") => void;
+}
+
+const MenuButton: React.FC<MenuButtonProps> = ({
+    id,
+    icon,
+    marginLeft = 0,
+    marginRight = 0,
+    selected,
+    handleViewSelect,
+}) => {
+    const [hovered, setHovered] = useState<boolean>(false);
+
+    const bgNormal = `url(${IMAGE}backgrounds/interface.png)`;
+    const bgHighlighted = `url(${IMAGE}backgrounds/interfacehighlighted.png)`;
+    const bgSelected = `url(${IMAGE}backgrounds/interfacedark.png)`;
+
+    return (
+        <Window
+            content={
+                <div
+                    onClick={() => handleViewSelect(id)}
+                    onMouseEnter={() => setHovered(true)}
+                    onMouseLeave={() => setHovered(false)}
+                    style={{
+                        cursor: "pointer",
+                        width: "36px",
+                        height: "36px",
+                        backgroundImage: selected ? bgSelected : (hovered ? bgHighlighted : bgNormal),
+                        backgroundSize: "cover",
+                    }}
+                >
+                    <img src={`${IMAGE}menu/${icon}`} alt={`${id} icon`} style={{ pointerEvents: "none" }} />
+                </div>
+            }
+            mt={5}
+            ml={marginLeft}
+            mr={marginRight}
+        />
+    );
+};
 
 /**
  * Menu Buttons Component
@@ -26,48 +70,21 @@ const MenuButtonsComponent: React.FC<MenuButtonsProps> = ({ view, handleViewSele
 
     // Button configuration
     const buttons: ButtonConfig[] = [
-        { key: "stats", icon: complete ? "statscomplete.png" : "stats.png", marginRight: 5 },
-        { key: "settings", icon: "settings.png", marginLeft: 5, marginRight: 5 },
-        { key: "info", icon: "info.png", marginLeft: 5 },
+        { id: "stats", icon: complete ? "statscomplete.png" : "stats.png", marginRight: 5 },
+        { id: "settings", icon: "settings.png", marginLeft: 5, marginRight: 5 },
+        { id: "info", icon: "info.png", marginLeft: 5 },
     ];
-
-    const renderButton = ({ key, icon, marginLeft = 0, marginRight = 0 }: ButtonConfig) => {
-
-        const bgNormal = `url(${IMAGE}backgrounds/interface.png)`;
-        const bgHighlighted = `url(${IMAGE}backgrounds/interfacehighlighted.png)`;
-        const bgSelected = `url(${IMAGE}backgrounds/interfacedark.png)`;
-
-        const [hovered, setHovered] = useState<boolean>(false);
-
-        return (
-            <Window
-                key={key}
-                content={
-                    <div
-                        onClick={() => handleViewSelect(key)}
-                        onMouseEnter={() => setHovered(true)}
-                        onMouseLeave={() => setHovered(false)}
-                        style={{
-                            cursor: "pointer",
-                            width: "36px",
-                            height: "36px",
-                            backgroundImage: view === key ? bgSelected : (hovered ? bgHighlighted : bgNormal),
-                            backgroundSize: "cover",
-                        }}
-                    >
-                        <img src={`${IMAGE}menu/${icon}`} alt={`${key} icon`} style={{ pointerEvents: "none" }} />
-                    </div>
-                }
-                mt={5}
-                ml={marginLeft}
-                mr={marginRight}
-            />
-        );
-    };
 
     return (
         <div style={{ display: "flex" }}>
-            {buttons.map(renderButton)}
+            {buttons.map((button) => (
+                <MenuButton
+                    key={button.id}
+                    {...button}
+                    selected={view === button.id}
+                    handleViewSelect={handleViewSelect}
+                />
+            ))}
         </div>
     );
 };

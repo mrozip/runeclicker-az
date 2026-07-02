@@ -34,8 +34,8 @@ export const useItems = create<ItemsStore>((set, get) => {
          * Determine which equipment slot should be highlighted based on item currently highlighted
          */
         getHighlightedSlot: (index: number | string | null): string | null => {
-            const playerItems = usePlayer((state) => state.player.inventory.items);
-            const gameItems = useData((state) => state.gameData.items);
+            const playerItems = usePlayer.getState().player.inventory.items;
+            const gameItems = useData.getState().gameData.items;
             if (typeof index == "number" && playerItems[index]) {
                 return gameItems[playerItems[index].id]?.slot ?? null;
             }
@@ -293,16 +293,16 @@ export const useItems = create<ItemsStore>((set, get) => {
 
                 // Inventory > Equipment
                 else if (isSourceInventory && !isTargetInventory) {
-                    let sourceItem = newItems[source]; // The item to equip
+                    const sourceItem = newItems[source]; // The item to equip
 
                     if (sourceItem !== null && gameData.items[sourceItem.id].slot == target) {
-                        let targetItem = newEquipment[target]; // The item being replaced
+                        const targetItem = newEquipment[target]; // The item being replaced
 
                         // If moving backpack, change inventory slots
                         if (gameData.items[sourceItem.id].slot == "back") {
-                            let oldSpace = targetItem ? gameData.items[targetItem.id].space ?? 0 : 0;
-                            let newSpace = gameData.items[sourceItem.id].space!;
-                            let space = newSpace - oldSpace;
+                            const oldSpace = targetItem ? gameData.items[targetItem.id].space ?? 0 : 0;
+                            const newSpace = gameData.items[sourceItem.id].space!;
+                            const space = newSpace - oldSpace;
 
                             // Do not allow move if any inventory slots which will be removed have items
                             if (space < 0 && newItems.slice(space).some(item => item != null)) {
@@ -355,17 +355,17 @@ export const useItems = create<ItemsStore>((set, get) => {
 
                 // Equipment > Inventory
                 else if (!isSourceInventory && isTargetInventory) {
-                    let sourceItem = newEquipment[source]; // The item being unequipped
+                    const sourceItem = newEquipment[source]; // The item being unequipped
 
                     if (sourceItem !== null) {
 
-                        let targetItem = newItems[target]; // The item currently in inventory slot
+                        const targetItem = newItems[target]; // The item currently in inventory slot
 
                         // If moving backpack, change inventory slots
                         if (gameData.items[sourceItem.id].slot == "back") {
-                            let newSpace = targetItem ? gameData.items[targetItem.id].space ?? 0 : 0;
-                            let oldSpace = gameData.items[sourceItem.id].space!;
-                            let space = newSpace - oldSpace;
+                            const newSpace = targetItem ? gameData.items[targetItem.id].space ?? 0 : 0;
+                            const oldSpace = gameData.items[sourceItem.id].space!;
+                            const space = newSpace - oldSpace;
 
                             // Do not allow move if any inventory slots which will be removed have items
                             if (space < 0 && newItems.slice(space).some(item => item != null)) {
@@ -388,7 +388,7 @@ export const useItems = create<ItemsStore>((set, get) => {
                         }
 
                         if (targetItem !== null) {
-                            let correctSlot = gameData.items[targetItem.id].slot == source;
+                            const correctSlot = gameData.items[targetItem.id].slot == source;
                             if (correctSlot) {
                                 // Remove item from equipment
                                 newEquipment[source] = null;

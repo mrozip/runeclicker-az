@@ -148,14 +148,12 @@ export const useTask = create<TaskStore>((set, get) => {
             switch (skill) {
                 case "Woodcutting":
                 case "Mining":
-                case "Stamina":
-                    let data = gameData.tasks[skill][task]
-                    if (useSettings.getState().fast) {
-                        data.actions = 1;
-                    }
-                    return data;
+                case "Stamina": {
+                    const data = gameData.tasks[skill][task];
+                    return useSettings.getState().fast ? { ...data, actions: 1 } : data;
+                }
 
-                case "Processing":
+                case "Processing": {
                     const recipe = gameData.recipes[task];
                     return {
                         name: gameData.items[recipe.output[0].id].name,
@@ -167,8 +165,9 @@ export const useTask = create<TaskStore>((set, get) => {
                         input: recipe.input,
                         output: recipe.output
                     };
+                }
 
-                case "Merchanting":
+                case "Merchanting": {
                     const value = useItems.getState().calculateValue(task);
                     return {
                         name: gameData.items[task].name,
@@ -180,8 +179,9 @@ export const useTask = create<TaskStore>((set, get) => {
                         input: [{ id: task, quantity: 1 }],
                         output: [{ id: 79, quantity: { min: value, max: value }, probability: 1 }]
                     };
+                }
 
-                case "Combat":
+                case "Combat": {
                     const zone = gameData.zones[task];
                     return {
                         name: zone.name,
@@ -193,8 +193,9 @@ export const useTask = create<TaskStore>((set, get) => {
                         input: undefined,
                         output: undefined
                     };
-                case "Farming":
-                    const crop = gameData.farming.cropData[player.plots[task!].seed!];
+                }
+                case "Farming": {
+                    const crop = gameData.farming.cropData[player.plots[task].seed!];
                     return {
                         name: "",
                         lvl: 0,
@@ -205,6 +206,7 @@ export const useTask = create<TaskStore>((set, get) => {
                         input: undefined,
                         output: crop && crop.output
                     };
+                }
 
                 default:
                     throw new Error(`Unknown skill: ${skill}`);
@@ -273,7 +275,8 @@ export const useTask = create<TaskStore>((set, get) => {
 
             const { player } = usePlayer.getState();
             const { calculateStats } = useStats.getState();
-            const clickValue = (calculateStats(player.skill) as any).click ?? 1;
+            const stats = calculateStats(player.skill);
+            const clickValue = "click" in stats ? stats.click : 1;
 
             get().performAction(clickValue);
         },

@@ -203,6 +203,7 @@ export const useFarming = create<FarmingStore>((set, get) => {
     const plant = (plot: number) => {
         const seed = get().seed;
         const fertiliser = get().fertiliser;
+        if (!seed) return;
 
         // Fill player plot data
         usePlayer.setState((s) => {
@@ -226,7 +227,7 @@ export const useFarming = create<FarmingStore>((set, get) => {
 
         const { addMessage } = useConsole.getState();
         const items = useData.getState().gameData.items;
-        addMessage(`You plant the ${items[seed?.id!].name}${fertiliser ? ` with ${items[fertiliser?.id!].name}` : ""}.`);
+        addMessage(`You plant the ${items[seed.id].name}${fertiliser ? ` with ${items[fertiliser.id].name}` : ""}.`);
     };
 
     const tick = () => {

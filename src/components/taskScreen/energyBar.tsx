@@ -7,7 +7,7 @@ import { useStats } from "../../logic/useStats";
 import { useData } from "../../logic/useData";
 import { usePlayer } from "../../logic/usePlayer";
 
-export const EnergyBar: React.FC<{}> = ({ }) => {
+export const EnergyBar: React.FC = () => {
     const xp = usePlayer((state) => state.player.xp);
     const skill = usePlayer((state) => state.player.skill);
     const energy = useTask((state) => state.energy);

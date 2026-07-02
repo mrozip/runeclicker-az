@@ -23,7 +23,8 @@ interface EnemyProps {
 const EnemyComponent: React.FC<EnemyProps> = ({ index, quantity, updated = false, lock = true }) => {
 
     const enemyData = useData((state) => state.gameData.enemies[index]);
-    const locked = lock && usePlayer((state) => state.player.records.enemies[index] < 1);
+    const enemyRecord = usePlayer((state) => state.player.records.enemies[index]);
+    const locked = lock && enemyRecord < 1;
     const gameData = useData((state) => state.gameData);
     const calculateDepth = useCombat((state) => state.calculateDepth);
     const playerData = usePlayer((s) => s.player);
@@ -42,7 +43,7 @@ const EnemyComponent: React.FC<EnemyProps> = ({ index, quantity, updated = false
                 depthArray.some(e => e.id === index)
             )
         );
-    }, [index]);
+    }, [gameData.zones, index]);
 
     const zoneData = gameData.zones[zoneIndex];
 
@@ -64,7 +65,7 @@ const EnemyComponent: React.FC<EnemyProps> = ({ index, quantity, updated = false
     // How deep the player has unlocked in this zone
     const playerDepth = calculateDepth(playerData.records.zones[zoneIndex]);
 
-    const depthDisplay = (
+    const depthDisplay = useMemo(() => (
         <div style={{ display: "flex" }}>
             {depthStats.map((p, idx) => {
                 const unlocked = playerDepth >= idx;
@@ -89,9 +90,9 @@ const EnemyComponent: React.FC<EnemyProps> = ({ index, quantity, updated = false
                 );
             })}
         </div>
-    );
+    ), [depthStats, depthTotals, playerDepth]);
 
-    const itemIcons = (
+    const itemIcons = useMemo(() => (
         <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
             {enemyData.items.map((it, i) => (
                 <FractionItem
@@ -107,7 +108,7 @@ const EnemyComponent: React.FC<EnemyProps> = ({ index, quantity, updated = false
                 <Text text={`${enemyData.xp} xp`} type="bold" colour="white" />
             </div>
         </div>
-    );
+    ), [enemyData.items, enemyData.xp]);
 
     // Mouse-over tooltip
     const tooltipContent = useMemo(() => {
@@ -150,7 +151,16 @@ const EnemyComponent: React.FC<EnemyProps> = ({ index, quantity, updated = false
                 </div>
             </>
         );
-    }, [locked, index]);
+    }, [
+        depthDisplay,
+        enemyData.accuracy,
+        enemyData.defence,
+        enemyData.health,
+        enemyData.name,
+        enemyData.strength,
+        itemIcons,
+        locked,
+    ]);
 
     return (
         <Tooltip content={tooltipContent}>

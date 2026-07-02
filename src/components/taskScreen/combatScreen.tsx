@@ -25,6 +25,7 @@ const LabelsRow: React.FC<{
     rest: boolean;
     escape: boolean;
 }> = ({ enemy, rest, escape }) => {
+    const enemyName = useData((state) => enemy ? state.gameData.enemies[enemy.id].name : "");
     let name;
     let icon;
     if (rest) {
@@ -46,8 +47,8 @@ const LabelsRow: React.FC<{
             }}
         />
     } else {
-        name = enemy ? useData((state) => state.gameData.enemies[enemy.id]).name : "";
-        icon = <Enemy index={enemy?.id!} quantity={1} lock={false} />
+        name = enemyName;
+        icon = enemy ? <Enemy index={enemy.id} quantity={1} lock={false} /> : null;
     }
 
     return (
@@ -127,12 +128,12 @@ const HealthBarsRow: React.FC<{
     const restSteps = useCombat((state) => state.restSteps);
     const maxSteps = escape ? escapeSteps : restSteps;
 
-    const enemyBar = enemyData ? (enemy!.health / enemyData.health) * 100 : (actions / maxSteps) * 100;
+    const enemyBar = enemy && enemyData ? (enemy.health / enemyData.health) * 100 : (actions / maxSteps) * 100;
     const playerBar = (health / playerStats.health) * 100;
     const enemyDamageBar = (enemyData && enemyDamage !== null) ? ((enemyDamage / enemyData.health) * 100) : 0;
     const playerDamageBar = playerDamage !== null ? ((playerDamage / playerStats.health) * 100) : 0;
 
-    const enemyText = enemyData ? `${enemy!.health} / ${enemyData.health}` : `${actions} / ${maxSteps}`;
+    const enemyText = enemy && enemyData ? `${enemy.health} / ${enemyData.health}` : `${actions} / ${maxSteps}`;
     const playerText = `${health} / ${playerStats.health}`;
 
     const playerEffectiveDamage = calculateAverageDamage(true) * calculateHitChance(true);

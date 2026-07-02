@@ -35,17 +35,18 @@ const SkillListComponent: React.FC<SkillListProps> = ({ view, handleViewSelect }
     const bgNormal = `url(${IMAGE}backgrounds/interface.png)`;
     const bgHighlighted = `url(${IMAGE}backgrounds/interfacehighlighted.png)`;
     const bgSelect = `url(${IMAGE}backgrounds/interfacedark.png)`;
+    const skillNames = Object.keys(playerXp);
 
     const content = (
         <>
-            {Object.entries(playerXp).map(([skill, _], idx) => {
+            {skillNames.map((skill, idx) => {
                 const isSelected = skill === playerSkill && view === "skill";
                 const isHovered = hoveredSkill === skill;
                 const backgroundImage = isSelected ? bgSelect : isHovered ? bgHighlighted : bgNormal;
 
                 const unlockedTask = unlockedTasks.some(unlock => unlock.skill === skill);
 
-                const last = idx == Object.entries(playerXp).length - 1;
+                const last = idx == skillNames.length - 1;
 
                 return (
                     <div

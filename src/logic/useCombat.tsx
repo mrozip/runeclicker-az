@@ -488,7 +488,7 @@ export const useCombat = create<CombatStore>((set, get) => {
         } else {
             stats = useStats.getState().calculateStats("Combat") as CombatStats;
         }
-        let maxHealth = stats.health;
+        const maxHealth = stats.health;
 
         const heal = effectData.heal ?? 0;
         const healCapped = Math.min(heal, maxHealth - currentHealth);
@@ -630,7 +630,7 @@ export const useCombat = create<CombatStore>((set, get) => {
         if (target === "player") {
             effects = get().effects;
         } else {
-            let enemy = get().enemy;
+            const enemy = get().enemy;
             if (enemy === null) { return false };
             effects = enemy.effects;
         }
@@ -642,7 +642,7 @@ export const useCombat = create<CombatStore>((set, get) => {
         if (target === "player") {
             effects = get().effects;
         } else {
-            let enemy = get().enemy;
+            const enemy = get().enemy;
             if (enemy === null) { return false };
             effects = enemy.effects;
         }

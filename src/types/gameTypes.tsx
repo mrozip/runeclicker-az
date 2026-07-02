@@ -1,13 +1,13 @@
 // Stat Tables
-export interface XpData extends Array<number> { }
+export type XpData = number[];
 
-export interface SpeedData extends Array<number> { }
+export type SpeedData = number[];
 
-export interface MerchantingData extends Array<number> { }
+export type MerchantingData = number[];
 
-export interface StaminaData extends Array<number> { }
+export type StaminaData = number[];
 
-export interface FarmingStats extends Array<number> { }
+export type FarmingStatData = number[];
 
 export interface CombatData {
   health: number[];
@@ -163,7 +163,7 @@ export interface StatData {
   merchanting: MerchantingData;
   stamina: StaminaData;
   combat: CombatData;
-  farming: FarmingStats;
+  farming: FarmingStatData;
 }
 
 export interface GameData {

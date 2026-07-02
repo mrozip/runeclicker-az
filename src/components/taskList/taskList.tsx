@@ -40,7 +40,7 @@ const LockedTask: React.FC<{ lvl: number }> = ({ lvl }) => {
  * No Tasks Component
  * - Displays a message if there are no available tasks.
  */
-const NoTasks: React.FC = ({ }) => {
+const NoTasks: React.FC = () => {
     return (
         <div style={{
             backgroundImage: `url(${IMAGE}backgrounds/interfacelocked.png)`,

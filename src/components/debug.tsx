@@ -4,11 +4,7 @@ import { useData } from "../logic/useData";
 import { useItems } from "../logic/useItems";
 import { useSettings } from "../logic/useSettings";
 
-interface DebugProps {
-
-}
-
-export const Debug: React.FC<DebugProps> = ({ }) => {
+export const Debug: React.FC = () => {
     const itemOptions = useData((s) => s.gameData.items);
     const [itemSelected, setItemSelected] = useState(0);
     const addItems = useItems((s) => s.addItems);

@@ -7,7 +7,7 @@ import { useConsole } from "../logic/useConsole";
  * Console Component
  * - Displays game messages as a list, grouping duplicates.
  */
-const ConsoleComponent: React.FC = ({ }) => {
+const ConsoleComponent: React.FC = () => {
     const messages = useConsole((s) => s.messages);
     const consoleRef = useRef<HTMLDivElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
