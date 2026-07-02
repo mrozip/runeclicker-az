@@ -1,0 +1,213 @@
+name: Terraform
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Terraform operation to run manually.
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+      bootstrap_state:
+        description: Create or update the Terraform state storage account before running Terraform.
+        required: false
+        default: false
+        type: boolean
+      resource_group_name:
+        description: Azure resource group name for a manual run.
+        required: true
+        default: rg-runeclicker-app-sbx
+        type: string
+      static_web_app_name:
+        description: Azure Static Web App name for a manual run.
+        required: true
+        default: swa-runeclicker-app-sbx
+        type: string
+      state_key:
+        description: Terraform state key for a manual run. Use a separate key for sandbox resources.
+        required: true
+        default: runeclicker/sbx/app.tfstate
+        type: string
+      location:
+        description: Azure region for a manual run.
+        required: true
+        default: eastus
+        type: string
+      sku:
+        description: Azure Static Web Apps SKU for a manual run.
+        required: true
+        default: Free
+        type: choice
+        options:
+          - Free
+          - Standard
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: terraform-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  TF_WORKING_DIR: infra/terraform
+
+  ARM_USE_AZUREAD: "true"
+  ARM_USE_OIDC: "true"
+  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+  TF_VAR_resource_group_name: ${{ inputs.resource_group_name }}
+  TF_VAR_static_web_app_name: ${{ inputs.static_web_app_name }}
+  TF_VAR_location: ${{ inputs.location }}
+  TF_VAR_sku: ${{ inputs.sku }}
+
+  TF_STATE_RESOURCE_GROUP_NAME: ${{ vars.TF_STATE_RESOURCE_GROUP_NAME || 'rg-runeclicker-state-shared' }}
+  TF_STATE_STORAGE_ACCOUNT_NAME: ${{ vars.TF_STATE_STORAGE_ACCOUNT_NAME }}
+  TF_STATE_CONTAINER_NAME: ${{ vars.TF_STATE_CONTAINER_NAME || 'tfstate' }}
+  TF_STATE_KEY: ${{ inputs.state_key }}
+  TF_STATE_LOCATION: ${{ vars.TF_STATE_LOCATION || 'eastus' }}
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    environment: terraform
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Check required GitHub variables
+        run: |
+          : "${ARM_CLIENT_ID:?Set AZURE_CLIENT_ID as a GitHub variable.}"
+          : "${ARM_TENANT_ID:?Set AZURE_TENANT_ID as a GitHub variable.}"
+          : "${ARM_SUBSCRIPTION_ID:?Set AZURE_SUBSCRIPTION_ID as a GitHub variable.}"
+          : "${TF_STATE_STORAGE_ACCOUNT_NAME:?Set TF_STATE_STORAGE_ACCOUNT_NAME as a GitHub variable.}"
+
+      - name: Azure login
+        if: inputs.bootstrap_state == true
+        uses: azure/login@v3
+        with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+
+      - name: Bootstrap Terraform state backend
+        if: inputs.bootstrap_state == true
+        run: |
+          set -euo pipefail
+
+          az account set --subscription "$ARM_SUBSCRIPTION_ID"
+          az account show \
+            --query "{subscriptionId:id, tenantId:tenantId, user:user.name}" \
+            --output json
+
+          az provider register \
+            --namespace Microsoft.Storage \
+            --wait \
+            --subscription "$ARM_SUBSCRIPTION_ID"
+
+          az group create \
+            --name "$TF_STATE_RESOURCE_GROUP_NAME" \
+            --location "$TF_STATE_LOCATION" \
+            --subscription "$ARM_SUBSCRIPTION_ID"
+
+          az storage account create \
+            --name "$TF_STATE_STORAGE_ACCOUNT_NAME" \
+            --resource-group "$TF_STATE_RESOURCE_GROUP_NAME" \
+            --location "$TF_STATE_LOCATION" \
+            --sku Standard_LRS \
+            --kind StorageV2 \
+            --allow-blob-public-access false \
+            --min-tls-version TLS1_2 \
+            --subscription "$ARM_SUBSCRIPTION_ID"
+
+          account_id="$(az storage account show \
+            --name "$TF_STATE_STORAGE_ACCOUNT_NAME" \
+            --resource-group "$TF_STATE_RESOURCE_GROUP_NAME" \
+            --subscription "$ARM_SUBSCRIPTION_ID" \
+            --query id \
+            --output tsv)"
+          principal_id="$(az ad sp show --id "$ARM_CLIENT_ID" --query id --output tsv)"
+          assignment_count="$(az role assignment list \
+            --assignee "$principal_id" \
+            --role "Storage Blob Data Contributor" \
+            --scope "$account_id" \
+            --subscription "$ARM_SUBSCRIPTION_ID" \
+            --query "length(@)" \
+            --output tsv)"
+
+          if [ "$assignment_count" = "0" ]; then
+            az role assignment create \
+              --assignee "$principal_id" \
+              --role "Storage Blob Data Contributor" \
+              --scope "$account_id" \
+              --subscription "$ARM_SUBSCRIPTION_ID"
+          fi
+
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            if az storage container create \
+              --name "$TF_STATE_CONTAINER_NAME" \
+              --account-name "$TF_STATE_STORAGE_ACCOUNT_NAME" \
+              --auth-mode login; then
+              exit 0
+            fi
+
+            echo "Attempt $attempt of 12."
+            sleep 10
+          done
+
+          echo "Failed to create Terraform container."
+          exit 1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.15.7
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        run: |
+          terraform init \
+            -backend-config="storage_account_name=${TF_STATE_STORAGE_ACCOUNT_NAME}" \
+            -backend-config="container_name=${TF_STATE_CONTAINER_NAME}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="resource_group_name=${TF_STATE_RESOURCE_GROUP_NAME}"
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: |
+          if [ "${{ inputs.operation }}" = "destroy" ]; then
+            terraform plan -destroy -no-color -out=tfplan
+          else
+            terraform plan -no-color -out=tfplan
+          fi
+
+      - name: Summarize Terraform plan
+        run: |
+          {
+            echo "### Terraform plan"
+            echo '```terraform'
+            terraform show -no-color tfplan
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Terraform apply
+        if: inputs.operation == 'apply' || inputs.operation == 'destroy'
+        run: terraform apply -auto-approve tfplan

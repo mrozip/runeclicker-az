@@ -1,0 +1,21 @@
+{
+  "trailingSlash": "auto",
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/assets/*",
+      "/assets/**",
+      "/hacktimer/*",
+      "/hacktimer/**",
+      "/images/*",
+      "/images/**",
+      "/tables/*",
+      "/tables/**",
+      "/*.{css,js,map,json,ico,png,jpg,jpeg,gif,webp,svg,txt,woff,woff2}"
+    ]
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
+  }
+}
